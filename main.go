@@ -13,7 +13,7 @@
 // 저장 형식: ❯ 사용자, ⏺ 클로드, ⎿ 도구결과 — 터미널 출력 그대로
 // 파일명: YYYYMMDD_대화록_HH시.md (시간대별 1개)
 //
-// 로그: ~/carcare/자동화프로그램/대화록/chatlog.log
+// 로그: <작업디렉토리>/chatlog.log
 // PID: ~/.chat.pid
 // 로컬 API: localhost:7758
 
@@ -86,7 +86,7 @@ const (
 	serverPort    = "7758"
 	pollInterval  = 30 * time.Second
 	activeTimeout = 5 * time.Minute
-	claudeBin     = "/Users/studiogm/.local/bin/claude" // Claude CLI 경로 — 환경에 맞게 수정
+	claudeBin     = "claude" // Claude CLI 경로 — 환경에 맞게 수정 (예: /usr/local/bin/claude)
 	evalHour      = 22 // 매일 저녁 10시
 	saengakHour   = 23 // 매일 밤 11시 — 생각 추출
 )
@@ -170,9 +170,13 @@ func (w reopenWriter) Write(p []byte) (int, error) {
 
 func init() {
 	home, _ = os.UserHomeDir()
-	carcare = filepath.Join(home, "carcare") // 작업 디렉토리 — 환경에 맞게 수정
+	// 작업 디렉토리 — 환경변수 CHATLOG_DIR 또는 기본값 ~/claude-chatlog
+	carcare = os.Getenv("CHATLOG_DIR")
+	if carcare == "" {
+		carcare = filepath.Join(home, "claude-chatlog")
+	}
 	logDir = filepath.Join(carcare, "대화록")
-	progDir = filepath.Join(carcare, "자동화프로그램", "대화록")
+	progDir = carcare
 	logPath = filepath.Join(progDir, "chatlog.log")
 	pidFile = filepath.Join(home, ".chat.pid")
 	projectDirs = detectProjectDirs(home)

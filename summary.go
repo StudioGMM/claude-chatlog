@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-const claudePath = "/Users/studiogm/.local/bin/claude" // Claude CLI 경로 — 환경에 맞게 수정
+const claudePath = "claude" // Claude CLI 경로 — 환경에 맞게 수정 (예: /usr/local/bin/claude)
 
 var (
 	summaryDir string
