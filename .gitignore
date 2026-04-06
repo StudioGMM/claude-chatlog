@@ -1,0 +1,11 @@
+# Binary
+claude-chatlog
+chat
+대화록
+
+# Logs
+*.log
+*.pid
+
+# OS
+.DS_Store
