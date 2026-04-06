@@ -46,27 +46,32 @@ Claude Code 대화 자동 기록 도구 — macOS 메뉴바 위젯
 
 ## 설치
 
+### 1. Claude CLI 설치
+
+[Claude Code](https://docs.anthropic.com/en/docs/claude-code) 설치 후 `claude` 명령어가 PATH에 있는지 확인:
+
+```bash
+which claude
+```
+
+### 2. 빌드
+
 ```bash
 git clone https://github.com/StudioGMM/claude-chatlog.git
 cd claude-chatlog
-```
-
-`main.go` 상단의 경로 상수를 환경에 맞게 수정:
-
-```go
-const claudeBin = "/path/to/claude"  // Claude CLI 경로
-```
-
-```go
-carcare = filepath.Join(home, "your-project-dir")  // 작업 디렉토리
-logDir  = filepath.Join(carcare, "대화록")           // 대화록 저장 경로
-```
-
-빌드:
-
-```bash
 make build
 ```
+
+### 3. 설정 (선택)
+
+대화록 저장 디렉토리를 지정하려면 환경변수 `CHATLOG_DIR`을 설정합니다.
+미설정 시 기본값은 `~/claude-chatlog` 입니다.
+
+```bash
+export CHATLOG_DIR="$HOME/my-chatlog"
+```
+
+Claude CLI가 PATH에 없는 경우, `main.go`와 `summary.go`의 `claudeBin`/`claudePath` 상수를 직접 수정하세요.
 
 ## 실행
 
@@ -74,7 +79,21 @@ make build
 ./claude-chatlog
 ```
 
-macOS 시작 시 자동 실행하려면 `com.carcare.chatlog.plist`를 참고하여 LaunchAgent를 등록하세요.
+실행하면 macOS 메뉴바에 `🟢 CHAT` 아이콘이 나타납니다.
+
+- `~/.claude/projects/` 디렉토리를 30초 간격으로 감시
+- 새 대화가 감지되면 `$CHATLOG_DIR/대화록/` 에 마크다운으로 자동 저장
+- 시간대가 바뀌면 이전 시간대의 요약·클린본을 자동 생성
+
+### macOS 자동 시작 (LaunchAgent)
+
+`com.carcare.chatlog.plist`를 참고하여 LaunchAgent를 등록하면 부팅 시 자동 실행됩니다:
+
+```bash
+# plist 내 경로를 본인 환경에 맞게 수정 후
+cp com.carcare.chatlog.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.carcare.chatlog.plist
+```
 
 ## API
 
