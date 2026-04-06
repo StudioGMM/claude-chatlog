@@ -85,15 +85,80 @@ Claude CLI가 PATH에 없는 경우, `main.go`와 `summary.go`의 `claudeBin`/`c
 - 새 대화가 감지되면 `$CHATLOG_DIR/대화록/` 에 마크다운으로 자동 저장
 - 시간대가 바뀌면 이전 시간대의 요약·클린본을 자동 생성
 
-### macOS 자동 시작 (LaunchAgent)
+### macOS 자동 시작 (LaunchAgent) — 상시 실행 가이드
 
-`com.carcare.chatlog.plist`를 참고하여 LaunchAgent를 등록하면 부팅 시 자동 실행됩니다:
+부팅 시 자동 실행 + 크래시 시 자동 재시작되도록 LaunchAgent를 등록합니다.
+
+#### Step 1. plist 경로 수정
+
+`com.chatlog.plist` 파일의 바이너리 경로를 본인 환경에 맞게 수정합니다:
 
 ```bash
-# plist 내 경로를 본인 환경에 맞게 수정 후
-cp com.carcare.chatlog.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.carcare.chatlog.plist
+# 빌드된 바이너리의 절대경로 확인
+realpath claude-chatlog
 ```
+
+plist 파일을 열어서 `ProgramArguments`의 경로를 위 결과로 수정:
+
+```xml
+<key>ProgramArguments</key>
+<array>
+    <string>/Users/yourname/claude-chatlog/claude-chatlog</string>
+</array>
+```
+
+`CHATLOG_DIR` 환경변수를 사용하려면 `EnvironmentVariables`를 추가:
+
+```xml
+<key>EnvironmentVariables</key>
+<dict>
+    <key>CHATLOG_DIR</key>
+    <string>/Users/yourname/my-chatlog</string>
+</dict>
+```
+
+#### Step 2. LaunchAgent 등록
+
+```bash
+cp com.chatlog.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.chatlog.plist
+```
+
+#### Step 3. 동작 확인
+
+```bash
+# 프로세스 확인
+launchctl list | grep chatlog
+
+# 메뉴바에 🟢 CHAT 아이콘 확인
+
+# API로 상태 확인
+curl http://localhost:7758/status
+```
+
+#### LaunchAgent 관리 명령어
+
+```bash
+# 중지
+launchctl unload ~/Library/LaunchAgents/com.chatlog.plist
+
+# 재시작
+launchctl unload ~/Library/LaunchAgents/com.chatlog.plist
+launchctl load ~/Library/LaunchAgents/com.chatlog.plist
+
+# 로그 확인
+tail -f /tmp/com.chatlog.out
+tail -f /tmp/com.chatlog.err
+```
+
+### 중복 실행 방지
+
+프로그램 내부에 PID 파일 기반 중복 방지가 구현되어 있습니다:
+
+- 시작 시 `~/.chat.pid` 파일을 확인
+- 이미 동일한 프로세스가 실행 중이면 `"이미 실행 중입니다."` 출력 후 종료
+- 비정상 종료 시 PID 파일이 남아 있더라도, 해당 PID의 프로세스가 실제로 살아있는지 검증
+- 따라서 수동 실행 + LaunchAgent가 동시에 떠도 **하나만 실행**됩니다
 
 ## API
 

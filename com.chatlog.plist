@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>com.carcare.chatlog</string>
+	<string>com.chatlog</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>/path/to/claude-chatlog/claude-chatlog</string>
@@ -13,8 +13,8 @@
 	<key>KeepAlive</key>
 	<true/>
 	<key>StandardOutPath</key>
-	<string>/tmp/com.carcare.chatlog.out</string>
+	<string>/tmp/com.chatlog.out</string>
 	<key>StandardErrorPath</key>
-	<string>/tmp/com.carcare.chatlog.err</string>
+	<string>/tmp/com.chatlog.err</string>
 </dict>
 </plist>
